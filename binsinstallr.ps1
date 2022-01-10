@@ -1,18 +1,15 @@
 $packages = Resolve-Path ".\packages"
-$sitelib = Join-Path $env:SystemDrive "r-packages"
-$rversion = 4.1
+$sitelib = Join-Path $env:SystemDrive "r-site-library"
 $threads = 8
 
-$installdir = Join-Path $sitelib $rversion
-
-if (-not (Test-Path $installdir)) {
-    New-Item $installdir -ItemType "directory" -Force | Out-Null
+if (-not (Test-Path $sitelib)) {
+    New-Item $sitelib -ItemType "directory" -Force | Out-Null
 }
 
 Get-ChildItem $packages -Filter "*.zip" | ForEach-Object -Parallel {
-    Expand-Archive $_.FullName -DestinationPath $using:installdir -Force
+    Expand-Archive $_.FullName -DestinationPath $using:sitelib -Force
     $pkgname = $_.Name.Split("_")[0]
-    $pkgdir =  Join-Path $using:installdir $pkgname
+    $pkgdir =  Join-Path $using:sitelib $pkgname
     $md5file = Join-Path $pkgdir "MD5"
     $success = $true
     if (Test-Path $md5file) {
