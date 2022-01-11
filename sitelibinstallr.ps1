@@ -1,5 +1,7 @@
+#Requires -RunAsAdministrator
+
 $pkgroot = Resolve-Path ".\packages" -ErrorAction "Stop"
-$sitelib = Join-Path $env:SystemDrive "r-site-library"
+$sitelib = Join-Path $env:ProgramData "r-site-library"
 $rversion = 4.1
 $threads = 8
 
@@ -38,7 +40,7 @@ ForEach-Object -Parallel {
 
 $purged = $false
 Get-ChildItem (Join-Path $env:SystemDrive "Users") -Force -Directory `
--Exclude "All Users","Default User","Public","Default","Administrator" | ForEach-Object {
+-Exclude "All Users","Default User","Public" | ForEach-Object {
     $renviron = Join-Path $_.FullName "Documents\.Renviron"
     if (-not (Test-Path $renviron)) {
         New-Item $renviron -ItemType "file" | Out-Null
