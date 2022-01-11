@@ -30,3 +30,13 @@ Get-ChildItem $packages -Filter "*.zip" | ForEach-Object -Parallel {
         Write-Warning "$pkgname failed checks and was not installed"
     }
 } -ThrottleLimit $threads
+
+Get-ChildItem (Join-Path $env:SystemDrive "Users") -Force -Directory `
+-Exclude "All Users","Default User","Public" | ForEach-Object {
+    $renviron = Join-Path $_.FullName "Documents\.Renviron"
+    if (-not (Test-Path $renviron)) {
+        New-Item $renviron -ItemType "file" | Out-Null
+    }
+    Add-Content $renviron -Value "R_LIBS_SITE=`"$sitelib`""
+    # TODO handle renviron files with no terminating newline
+}
