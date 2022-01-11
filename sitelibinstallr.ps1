@@ -1,15 +1,20 @@
-$packages = Resolve-Path ".\packages"
+$pkgroot = Resolve-Path ".\packages" -ErrorAction "Stop"
 $sitelib = Join-Path $env:SystemDrive "r-site-library"
+$rversion = 4.1
 $threads = 8
 
-if (-not (Test-Path $sitelib)) {
-    New-Item $sitelib -ItemType "directory" -Force | Out-Null
+$installdir = Join-Path $sitelib $rversion
+
+if (-not (Test-Path $installdir)) {
+    New-Item $installdir -ItemType "directory" -Force | Out-Null
 }
 
-Get-ChildItem $packages -Filter "*.zip" | ForEach-Object -Parallel {
-    Expand-Archive $_.FullName -DestinationPath $using:sitelib -Force
+Join-Path $pkgroot $rversion |
+Get-ChildItem -Filter "*.zip" -ErrorAction "Stop" |
+ForEach-Object -Parallel {
+    Expand-Archive $_.FullName -DestinationPath $using:installdir -Force
     $pkgname = $_.Name.Split("_")[0]
-    $pkgdir =  Join-Path $using:sitelib $pkgname
+    $pkgdir =  Join-Path $using:installdir $pkgname
     $md5file = Join-Path $pkgdir "MD5"
     $success = $true
     if (Test-Path $md5file) {
@@ -45,7 +50,7 @@ Get-ChildItem (Join-Path $env:SystemDrive "Users") -Force -Directory `
     if ($old.Count -gt $new.Count) {
         Set-Variable -Name "purged" -Value $true
     }
-    Add-Content $renviron -Value "R_LIBS_SITE=`"$sitelib`""
+    Add-Content $renviron -Value "R_LIBS_SITE=`"$sitelib\%v`""
 }
 if ($purged) {
     Write-Warning "exitsting R_LIBS_SITE entries removed from .Renviron files"
