@@ -18,11 +18,11 @@ Get-ChildItem $packages -Filter "*.zip" | ForEach-Object -Parallel {
             $file = Join-Path $pkgdir $_.Split(" ")[1].TrimStart("*")
             if (Test-Path $file) {
                 if ((Get-FileHash $file -Algorithm "MD5").Hash -ne $hash) {
-                    $success = $false
+                    Set-Variable -Name "success" -Value $false
                 }
-            } else { $success = $false }
+            } else { Set-Variable -Name "success" -Value $false }
         }
-    } else { $success = $false }
+    } else { Set-Variable -Name "success" -Value $false }
     if ($success) {
         Write-Host "$pkgname successfully unpacked and MD5 sums checked"
     } else {
@@ -31,12 +31,22 @@ Get-ChildItem $packages -Filter "*.zip" | ForEach-Object -Parallel {
     }
 } -ThrottleLimit $threads
 
+$purged = $false
 Get-ChildItem (Join-Path $env:SystemDrive "Users") -Force -Directory `
--Exclude "All Users","Default User","Public" | ForEach-Object {
+-Exclude "All Users","Default User","Public","Default","Administrator" | ForEach-Object {
     $renviron = Join-Path $_.FullName "Documents\.Renviron"
     if (-not (Test-Path $renviron)) {
         New-Item $renviron -ItemType "file" | Out-Null
+    } else {
+        $old = Get-Content $renviron
+        $new = $old | Where-Object {$_ -notmatch "^R_LIBS_SITE="} |
+        Set-Content -Path $renviron -Force -PassThru
+    }
+    if ($old.Count -gt $new.Count) {
+        Set-Variable -Name "purged" -Value $true
     }
     Add-Content $renviron -Value "R_LIBS_SITE=`"$sitelib`""
-    # TODO handle renviron files with no terminating newline
+}
+if ($purged) {
+    Write-Warning "exitsting R_LIBS_SITE entries removed from .Renviron files"
 }
