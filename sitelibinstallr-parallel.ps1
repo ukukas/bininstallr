@@ -2,7 +2,6 @@
 
 $pkgroot = Resolve-Path ".\packages" -ErrorAction "Stop"
 $sitelib = Join-Path $env:ProgramData "r-site-library"
-$rversion = 4.1
 $threads = 8
 
 if ($PSVersionTable.PSVersion.Major -lt 7) {
@@ -10,20 +9,27 @@ if ($PSVersionTable.PSVersion.Major -lt 7) {
     Exit 1
 }
 
-$installdir = Join-Path $sitelib $rversion
-
-if (-not (Test-Path $installdir)) {
-    New-Item $installdir -ItemType "directory" -Force | Out-Null
+if (-not (Test-Path $sitelib)) {
+    New-Item $sitelib -ItemType "directory" -Force -ErrorAction "Stop" |
+    Out-Null
+} else {
+    $testfile = Join-Path $sitelib "write-test"
+    New-Item  $testfile -ItemType "file" -Force -ErrorAction "Stop" | Out-Null
+    Remove-Item $testfile -Force
 }
 
-Join-Path $pkgroot $rversion |
-Get-ChildItem -Filter "*.zip" -ErrorAction "Stop" |
+Get-ChildItem $pkgroot -Filter "?.?" -Directory -ErrorAction "Stop" |
+Where-Object {$_.Name -match "^[0-9].[0-9]$"} |
+Get-ChildItem -Filter "*.zip" -File -ErrorAction "Stop" |
 ForEach-Object -Parallel {
-    Expand-Archive $_.FullName -DestinationPath $using:installdir -Force
+    $rver = $_.Directory.Name
+    $installdir = Join-Path $using:sitelib $rver
     $pkgname = $_.Name.Split("_")[0]
-    $pkgdir =  Join-Path $using:installdir $pkgname
+    $pkgver = $_.Name.Split("_")[1].TrimEnd(".zip")
+    $pkgdir =  Join-Path $installdir $pkgname
     $md5file = Join-Path $pkgdir "MD5"
     $success = $true
+    Expand-Archive $_.FullName $installdir -Force -ErrorAction "Ignore"
     if (Test-Path $md5file) {
         Get-Content $md5file | ForEach-Object {
             $hash = $_.Split(" ")[0]
@@ -36,10 +42,10 @@ ForEach-Object -Parallel {
         }
     } else { Set-Variable -Name "success" -Value $false }
     if ($success) {
-        Write-Host "$pkgname successfully unpacked and MD5 sums checked"
+        Write-Host "$pkgname $pkgver ($rver) unpacked and MD5 sums checked"
     } else {
-        Remove-Item $pkgdir -Recurse -Force -ErrorAction "SilentlyContinue"
-        Write-Warning "$pkgname failed checks and was not installed"
+        Remove-Item $pkgdir -Recurse -Force -ErrorAction "Ignore"
+        Write-Warning "$pkgname $pkgver ($rver) failed checks and was omitted"
     }
 } -ThrottleLimit $threads
 
