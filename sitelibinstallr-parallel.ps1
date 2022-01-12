@@ -5,6 +5,11 @@ $sitelib = Join-Path $env:ProgramData "r-site-library"
 $rversion = 4.1
 $threads = 8
 
+if ($PSVersionTable.PSVersion.Major -lt 7) {
+    Write-Error "PowerShell 7.0 or above required for parallel operation"
+    Exit 1
+}
+
 $installdir = Join-Path $sitelib $rversion
 
 if (-not (Test-Path $installdir)) {
@@ -55,5 +60,5 @@ Get-ChildItem (Join-Path $env:SystemDrive "Users") -Force -Directory `
     Add-Content $renviron -Value "R_LIBS_SITE=`"$sitelib\%v`""
 }
 if ($purged) {
-    Write-Warning "exitsting R_LIBS_SITE entries removed from .Renviron files"
+    Write-Warning "existing R_LIBS_SITE entries removed from .Renviron files"
 }
