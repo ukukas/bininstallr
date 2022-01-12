@@ -1,7 +1,7 @@
 #Requires -RunAsAdministrator
 
 $pkgroot = Resolve-Path ".\packages" -ErrorAction "Stop"
-$sitelib = Join-Path $env:ProgramData "r-site-library"
+$sitelib = Join-Path $env:ProgramFiles "r-site-library"
 
 if (-not (Test-Path $sitelib)) {
     New-Item $sitelib -ItemType "directory" -Force -ErrorAction "Stop" |

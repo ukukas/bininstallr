@@ -1,7 +1,7 @@
 #Requires -RunAsAdministrator
 
 $pkgroot = Resolve-Path ".\packages" -ErrorAction "Stop"
-$sitelib = Join-Path $env:ProgramData "r-site-library"
+$sitelib = Join-Path $env:ProgramFiles "r-site-library"
 $threads = 8
 
 if ($PSVersionTable.PSVersion.Major -lt 7) {
