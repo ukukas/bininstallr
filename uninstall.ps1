@@ -1,6 +1,6 @@
 #Requires -RunAsAdministrator
 
-$sitelib = Join-Path $env:ProgramData "r-site-library"
+$sitelib = Join-Path $env:ProgramFiles "r-site-library"
 
 Remove-Item $sitelib -Recurse -Force -ErrorAction "Stop"
 
