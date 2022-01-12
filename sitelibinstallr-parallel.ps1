@@ -54,7 +54,7 @@ Get-ChildItem (Join-Path $env:SystemDrive "Users") -Force -Directory `
 -Exclude "All Users","Default User","Public" | ForEach-Object {
     $renviron = Join-Path $_.FullName "Documents\.Renviron"
     if (-not (Test-Path $renviron)) {
-        New-Item $renviron -ItemType "file" | Out-Null
+        New-Item $renviron -ItemType "file" -Force | Out-Null
     } else {
         $old = Get-Content $renviron
         $new = $old | Where-Object {$_ -notmatch "^R_LIBS_SITE="} |
@@ -63,7 +63,7 @@ Get-ChildItem (Join-Path $env:SystemDrive "Users") -Force -Directory `
     if ($old.Count -gt $new.Count) {
         Set-Variable -Name "purged" -Value $true
     }
-    Add-Content $renviron -Value "R_LIBS_SITE=`"$sitelib\%v`""
+    Add-Content $renviron -Value "R_LIBS_SITE=`"$sitelib\%v`"" -Force
 }
 if ($purged) {
     Write-Warning "existing R_LIBS_SITE entries removed from .Renviron files"
