@@ -9,7 +9,12 @@ Get-ChildItem (Join-Path $env:SystemDrive "Users") -Force -Directory `
     $renviron = Join-Path $_.FullName "Documents\.Renviron"
     if (Test-Path $renviron) {
         $content = Get-Content $renviron
-        $content | Where-Object {$_ -notmatch "R_LIBS_SITE"} |
-        Set-Content -Path $renviron -Force
+        $content = $content | Where-Object {$_ -notmatch "R_LIBS_SITE"}
+        if ($content) {
+            Set-Content -Path $renviron -Value $content -Force
+        } else {
+            Remove-Item $renviron -Force
+        }
+
     }
 }

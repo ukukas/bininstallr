@@ -51,11 +51,11 @@ Get-ChildItem (Join-Path $env:SystemDrive "Users") -Force -Directory `
         New-Item $renviron -ItemType "file" -Force | Out-Null
     } else {
         $old = Get-Content $renviron
-        $new = $old | Where-Object {$_ -notmatch "^R_LIBS_SITE="} |
-        Set-Content -Path $renviron -Force -PassThru
-    }
-    if ($old.Count -gt $new.Count) {
-        Set-Variable -Name "purged" -Value $true
+        $new = $old | Where-Object {$_ -notmatch "^R_LIBS_SITE="}
+        Set-Content -Path $renviron -Value $new -Force
+        if ($old.Count -gt $new.Count) {
+            Set-Variable -Name "purged" -Value $true
+        }
     }
     Add-Content $renviron -Value "R_LIBS_SITE=`"$sitelib\%v`"" -Force
 }
