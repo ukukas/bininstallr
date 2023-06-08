@@ -1,6 +1,8 @@
 $pkgroot = Resolve-Path ".\packages" -ErrorAction "Stop"
 $threads = 8
 
+$ProgressPreference = "SilentlyContinue"
+
 if ($PSVersionTable.PSVersion.Major -lt 7) {
     Write-Error "PowerShell 7.0 or above required for parallel operation"
     Exit 1

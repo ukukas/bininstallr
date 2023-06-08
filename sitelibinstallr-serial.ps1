@@ -3,6 +3,8 @@
 $pkgroot = Resolve-Path ".\packages" -ErrorAction "Stop"
 $sitelib = Join-Path $env:ProgramFiles "r-site-library"
 
+$ProgressPreference = "SilentlyContinue"
+
 if (-not (Test-Path $sitelib)) {
     New-Item $sitelib -ItemType "directory" -Force -ErrorAction "Stop" |
     Out-Null

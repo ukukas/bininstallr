@@ -4,6 +4,8 @@ $pkgroot = Resolve-Path ".\packages" -ErrorAction "Stop"
 $sitelib = Join-Path $env:ProgramFiles "r-site-library"
 $threads = 8
 
+$ProgressPreference = "SilentlyContinue"
+
 if ($PSVersionTable.PSVersion.Major -lt 7) {
     Write-Error "PowerShell 7.0 or above required for parallel operation"
     Exit 1
